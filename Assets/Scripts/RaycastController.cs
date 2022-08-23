@@ -30,6 +30,10 @@ public class RaycastController : MonoBehaviour
                     {
                         if (hitObject.GetComponent<Piece>() != null)
                         {
+                            if(hitObject.GetComponent<Piece>().pieceColor != GameplayController.Instance.turnController.currentPlayer)
+                            {
+                                return;
+                            }
                             GameplayController.Instance.board.DeselectAllPieces();
                             hitObject.GetComponent<Piece>().ToggleOutline(true);
                         }
@@ -38,7 +42,14 @@ public class RaycastController : MonoBehaviour
                     {
                         Debug.Log("Click on a cell !");
                         Vector2Int selectedPosition = hitObject.GetComponent<Cell>().position; //lay toa do o dc chon
-                        GameplayController.Instance.board.MoveCurrentSelectedPieceTo(selectedPosition);
+                        if (GameplayController.Instance.board.CheckThisPositionHasPiece(selectedPosition))
+                        {
+                            GameplayController.Instance.board.CurrentSelectedPieceAttackTo(selectedPosition);
+                        }
+                        else
+                        {
+                            GameplayController.Instance.board.MoveCurrentSelectedPieceTo(selectedPosition);
+                        }
                     }
                 }
             }

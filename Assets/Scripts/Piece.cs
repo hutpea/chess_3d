@@ -32,5 +32,6 @@ public class Piece : MonoBehaviour
     public void ToggleMovement()
     {
         GameplayController.Instance.board.HighlightMovement(this);
+        GameplayController.Instance.board.HighlightAttack(this);
     }
 }

@@ -9,7 +9,9 @@ public class GameplayController : MonoBehaviour
     //Others ...
     public Board board;
     public RaycastController raycastController;
-    
+    public TurnController turnController;
+    public CameraController cameraController;
+    public UIController uiController;
     //...
 
     private void Awake()
@@ -22,5 +24,7 @@ public class GameplayController : MonoBehaviour
     private void Begin()
     {
         board.Begin();
+        turnController.Begin();
+        uiController.Begin();
     }
 }

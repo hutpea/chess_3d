@@ -22,6 +22,7 @@ public class Board : MonoBehaviour
     public Material whiteMaterial;
     public Material blackMaterial;
     public Material greenMaterial;
+    public Material redMaterial;
 
     private float cellDistance;
 
@@ -29,7 +30,8 @@ public class Board : MonoBehaviour
     public List<Piece> pieces;
 
     public Piece currentSelectedPiece = null;
-    public List<Vector2Int> currentHighlightPositions;
+    public List<Vector2Int> currentMovementPositions;
+    public List<Vector2Int> currentAttackPositions;
 
     public void Begin()
     {
@@ -41,7 +43,8 @@ public class Board : MonoBehaviour
     private void CreateBoard()
     {
         pieces = new List<Piece>();
-        currentHighlightPositions = new List<Vector2Int>();
+        currentMovementPositions = new List<Vector2Int>();
+        currentAttackPositions = new List<Vector2Int>();
         int run = 0;
         for(int i = 1; i <= 8; i++)
         {
@@ -147,7 +150,7 @@ public class Board : MonoBehaviour
 
     public void DeselectAllPieces()
     {
-        currentHighlightPositions.Clear();
+        currentMovementPositions.Clear();
         foreach (var piece in pieces)
         {
             piece.ToggleOutline(false);
@@ -157,10 +160,9 @@ public class Board : MonoBehaviour
 
     public void HighlightMovement(Piece piece) //hien cac o ma quan co "piece" di duoc
     {
-        currentHighlightPositions.Clear();
+        currentMovementPositions.Clear();
         //Tat ca vi tri
         Vector2Int currentPosition = piece.position;
-        Debug.Log(currentPosition);
         List<Vector2Int> allPositions = new List<Vector2Int>();
         switch (piece.pieceType)
         {
@@ -169,12 +171,14 @@ public class Board : MonoBehaviour
                     if(piece.pieceColor == PieceColor.White)
                     {
                         allPositions.Add(currentPosition + new Vector2Int(1, 0));
-                        allPositions.Add(currentPosition + new Vector2Int(2, 0));
+                        if(currentPosition.x == 2)
+                            allPositions.Add(currentPosition + new Vector2Int(2, 0));
                     }
                     else
                     {
                         allPositions.Add(currentPosition + new Vector2Int(-1, 0));
-                        allPositions.Add(currentPosition + new Vector2Int(-2, 0));
+                        if(currentPosition.x == 7)
+                            allPositions.Add(currentPosition + new Vector2Int(-2, 0));
                     }
                     break;
                 }
@@ -230,6 +234,135 @@ public class Board : MonoBehaviour
                     allPositions.Add(currentPosition + new Vector2Int(2, 1));
                     break;
                 }
+            case PieceType.Bishop:
+                {
+                    //cheo tren trai
+                    for(int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)))) {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                    }
+                    //cheo tren phai
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                    }
+                    //cheo duoi trai
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                    }
+                    //cheo duoi phai
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                    }
+                    break;
+                }
+            case PieceType.Queen:
+                {
+                    //Duyet len phia tren
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y)))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y));
+                    }
+                    //Duyet len phia duoi
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y)))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y));
+                    }
+                    //Duyet sang ben trai
+                    for (int i = currentPosition.y - 1; i >= 1; i--)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(currentPosition.x, i)))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(currentPosition.x, i));
+                    }
+                    //Duyet sang ben phai
+                    for (int i = currentPosition.y + 1; i <= 8; i++)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(currentPosition.x, i)))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(currentPosition.x, i));
+                    }
+                    //cheo tren trai
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                    }
+                    //cheo tren phai
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                    }
+                    //cheo duoi trai
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                    }
+                    //cheo duoi phai
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                    }
+                    break;
+                }
+            case PieceType.King:
+                {
+                    for(int i = currentPosition.x + 1; i >= currentPosition.x - 1; i--)
+                    {
+                        for(int j = currentPosition.y - 1; j <= currentPosition.y + 1; j++)
+                        {
+                            if(CheckThisPositionHasPiece(new Vector2Int(i, j))){
+                                continue;
+                            }
+                            allPositions.Add(new Vector2Int(i, j));
+                        }
+                    }
+                    break;
+                }
         }
         //Kiem tra tinh hop le
         List<Vector2Int> validPositions = new List<Vector2Int>();
@@ -248,8 +381,313 @@ public class Board : MonoBehaviour
         //Highlight
         foreach (var i in validPositions)
         {
-            currentHighlightPositions.Add(i);
+            currentMovementPositions.Add(i);
             boardTransformMatrix[i.x, i.y].GetComponent<MeshRenderer>().material = greenMaterial;
+        }
+    }
+
+    public void HighlightAttack(Piece piece) //hien cac co ma quan co "piece" co the an duoc quan doi phuong
+    {
+        currentAttackPositions.Clear();
+        Vector2Int currentPosition = piece.position;
+        List<Vector2Int> allPositions = new List<Vector2Int>();
+        switch (piece.pieceType)
+        {
+            case PieceType.Pawn:
+                {
+                    if (piece.pieceColor == PieceColor.White)
+                    {
+                        if(CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(1, -1)) )
+                            allPositions.Add(currentPosition + new Vector2Int(1, -1));
+                        if(CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(1, 1)))
+                            allPositions.Add(currentPosition + new Vector2Int(1, 1));
+                    }
+                    else
+                    {
+                        if(CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(-1, -1)))
+                            allPositions.Add(currentPosition + new Vector2Int(-1, -1));
+                        if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(-1, 1)))
+                            allPositions.Add(currentPosition + new Vector2Int(-1, 1));
+                    }
+                    break;
+                }
+                case PieceType.Rook:
+                    {
+                        //Duyet len phia tren
+                        for (int i = currentPosition.x + 1; i <= 8; i++)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y)))
+                            {
+                                allPositions.Add(new Vector2Int(i, currentPosition.y));
+                                break;
+                            }
+                            if(CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y)))
+                            {
+                                break;
+                            }
+                            continue;
+                        }
+                        //Duyet len phia duoi
+                        for (int i = currentPosition.x - 1; i >= 1; i--)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y)))
+                            {
+                                allPositions.Add(new Vector2Int(i, currentPosition.y));
+                                break;
+                            }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y)))
+                        {
+                            break;
+                        }
+                        continue;
+                        }
+                        //Duyet sang ben trai
+                        for (int i = currentPosition.y - 1; i >= 1; i--)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(currentPosition.x, i)))
+                            {
+                                allPositions.Add(new Vector2Int(currentPosition.x, i));
+                                break;
+                            }
+                        if (CheckThisPositionHasPiece(new Vector2Int(currentPosition.x, i)))
+                        {
+                            break;
+                        }
+                        continue;
+                        }
+                        //Duyet sang ben phai
+                        for (int i = currentPosition.y + 1; i <= 8; i++)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(currentPosition.x, i)))
+                            {
+                                allPositions.Add(new Vector2Int(currentPosition.x, i));
+                                break;
+                            }
+                        if (CheckThisPositionHasPiece(new Vector2Int(currentPosition.x, i)))
+                        {
+                            break;
+                        }
+                        continue;
+                        }
+                        break;
+                    }
+                case PieceType.Knight:
+                    {
+                    if(CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(-1, 2)))
+                        allPositions.Add(currentPosition + new Vector2Int(-1, 2));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(1, 2)))
+                        allPositions.Add(currentPosition + new Vector2Int(1, 2));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(-1, -2)))
+                        allPositions.Add(currentPosition + new Vector2Int(-1, -2));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(1, -2)))
+                        allPositions.Add(currentPosition + new Vector2Int(1, -2));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(-2, -1)))
+                        allPositions.Add(currentPosition + new Vector2Int(-2, -1));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(-2, 1)))
+                        allPositions.Add(currentPosition + new Vector2Int(-2, 1));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(2, -1)))
+                        allPositions.Add(currentPosition + new Vector2Int(2, -1));
+                    if (CheckIfThisCellHasOpponentPiece(piece, currentPosition + new Vector2Int(2, 1)))
+                        allPositions.Add(currentPosition + new Vector2Int(2, 1));
+                        break;
+                    }
+                case PieceType.Bishop:
+                    {
+                        //cheo tren trai
+                        for (int i = currentPosition.x + 1; i <= 8; i++)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                            {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                            break;
+                            }
+                            if(CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                            {
+                                break;
+                            }
+                        continue;
+                        }
+                        //cheo tren phai
+                        for (int i = currentPosition.x + 1; i <= 8; i++)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                            {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                            break;
+                            }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                        }
+                        //cheo duoi trai
+                        for (int i = currentPosition.x - 1; i >= 1; i--)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                            {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                            break;
+                            }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                        }
+                        //cheo duoi phai
+                        for (int i = currentPosition.x - 1; i >= 1; i--)
+                        {
+                            if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                            {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                            break;
+                            }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                        }
+                        break;
+                    }
+                case PieceType.Queen:
+                    {
+                    //Duyet len phia tren
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y)))
+                        {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y)))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //Duyet len phia duoi
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y)))
+                        {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y)))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //Duyet sang ben trai
+                    for (int i = currentPosition.y - 1; i >= 1; i--)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(currentPosition.x, i)))
+                        {
+                            allPositions.Add(new Vector2Int(currentPosition.x, i));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(currentPosition.x, i)))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //Duyet sang ben phai
+                    for (int i = currentPosition.y + 1; i <= 8; i++)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(currentPosition.x, i)))
+                        {
+                            allPositions.Add(new Vector2Int(currentPosition.x, i));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(currentPosition.x, i)))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //cheo tren trai
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //cheo tren phai
+                    for (int i = currentPosition.x + 1; i <= 8; i++)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //cheo duoi trai
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y - (i - currentPosition.x)));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y - (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    //cheo duoi phai
+                    for (int i = currentPosition.x - 1; i >= 1; i--)
+                    {
+                        if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            allPositions.Add(new Vector2Int(i, currentPosition.y + (i - currentPosition.x)));
+                            break;
+                        }
+                        if (CheckThisPositionHasPiece(new Vector2Int(i, currentPosition.y + (i - currentPosition.x))))
+                        {
+                            break;
+                        }
+                        continue;
+                    }
+                    break;
+                    }
+                case PieceType.King:
+                    {
+                        for (int i = currentPosition.x + 1; i >= currentPosition.x - 1; i--)
+                        {
+                            for (int j = currentPosition.y - 1; j <= currentPosition.y + 1; j++)
+                            {
+                                if (CheckIfThisCellHasOpponentPiece(piece, new Vector2Int(i, j)))
+                                {
+                                    allPositions.Add(new Vector2Int(i, j));
+                                    continue;
+                                }
+                            }
+                        }
+                        break;
+                    }
+        }
+        //Highlight
+        foreach (var i in allPositions)
+        {
+            currentAttackPositions.Add(i);
+            boardTransformMatrix[i.x, i.y].GetComponent<MeshRenderer>().material = redMaterial;
         }
     }
 
@@ -269,8 +707,9 @@ public class Board : MonoBehaviour
 
     public void MoveCurrentSelectedPieceTo(Vector2Int targetPosition) //x, y 1-1 -> 8, 8
     {
+        //Tim vi tri da co trong list chua
         bool isFindTargetInCurrentList = false;
-        foreach(var i in currentHighlightPositions)
+        foreach(var i in currentMovementPositions)
         {
             if(targetPosition == i)
             {
@@ -286,6 +725,33 @@ public class Board : MonoBehaviour
                 () => {
                     currentSelectedPiece.position = targetPosition;
                     GameplayController.Instance.raycastController.isEnableSelect = true;
+                    GameplayController.Instance.turnController.SwitchPlayer();
+                }
+        );
+    }
+
+    public void CurrentSelectedPieceAttackTo(Vector2Int targetPosition) //x, y 1-1 -> 8, 8
+    {
+        //Tim vi tri da co trong list chua
+        bool isFindTargetInCurrentList = false;
+        foreach (var i in currentAttackPositions)
+        {
+            if (targetPosition == i)
+            {
+                isFindTargetInCurrentList = true;
+                break;
+            }
+        }
+        if (!isFindTargetInCurrentList) return;
+
+        GameplayController.Instance.raycastController.isEnableSelect = false;
+        DeselectAllPieces();
+        currentSelectedPiece.transform.DOJump(boardTransformMatrix[targetPosition.x, targetPosition.y].position, 1.25f, 1, 1f).OnComplete(
+                () => {
+                    DeletePieceAtPosition(targetPosition);
+                    currentSelectedPiece.position = targetPosition;
+                    GameplayController.Instance.raycastController.isEnableSelect = true;
+                    GameplayController.Instance.turnController.SwitchPlayer();
                 }
         );
     }
@@ -300,7 +766,7 @@ public class Board : MonoBehaviour
     }
 
     //Check vi tri nay da co quan co nao hay chua
-    private bool CheckThisPositionHasPiece(Vector2Int position)
+    public bool CheckThisPositionHasPiece(Vector2Int position)
     {
         bool isFind = false;
         foreach (var j in pieces)
@@ -312,5 +778,53 @@ public class Board : MonoBehaviour
             }
         }
         return isFind;
+    }
+
+    private bool CheckIfThisCellHasOpponentPiece(Piece piece, Vector2Int position)
+    {
+        foreach (var j in pieces)
+        {
+            if (j.position == position)
+            {
+                if(piece.pieceColor == j.pieceColor)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+                break;
+            }
+        }
+        return false;
+    }
+
+    private void DeletePieceAtPosition(Vector2Int position)
+    {
+        foreach (var j in pieces)
+        {
+            if (j.position == position)
+            {
+                if(j.pieceType == PieceType.King)
+                {
+                    Debug.LogError("King !");
+                    if(GameplayController.Instance.turnController.currentPlayer == PieceColor.White)
+                    {
+                        //Trang thang
+                        GameplayController.Instance.uiController.ShowGameEndPopup("White");
+                    }
+                    else
+                    {
+                        //Den thang
+                        GameplayController.Instance.uiController.ShowGameEndPopup("Black");
+                    }
+                    return;
+                }
+                pieces.Remove(j);
+                Destroy(j.gameObject);
+                break;
+            }
+        }
     }
 }
